@@ -126,8 +126,19 @@ a { color: var(--primary); text-decoration: none; }
 .stat-buyers::before { content: '● '; color: var(--success); }
 
 /* ── Suburb detail columns ── */
-.suburb-columns { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-@media (max-width: 800px) { .suburb-columns { grid-template-columns: 1fr; } }
+.suburb-columns { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; position: relative; }
+.suburb-columns::before {
+  content: '';
+  position: absolute;
+  top: 0; bottom: 0; left: 50%;
+  width: 1px;
+  background: var(--border);
+  transform: translateX(-50%);
+}
+@media (max-width: 800px) {
+  .suburb-columns { grid-template-columns: 1fr; }
+  .suburb-columns::before { display: none; }
+}
 .column-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
 .column-header h2 { font-size: 15px; font-weight: 600; }
 

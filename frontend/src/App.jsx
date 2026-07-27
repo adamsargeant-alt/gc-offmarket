@@ -9,6 +9,7 @@ import Dashboard from './pages/Dashboard';
 import SuburbDetail from './pages/SuburbDetail';
 import MyListings from './pages/MyListings';
 import MyBuyers from './pages/MyBuyers';
+import AdminMembers from './pages/AdminMembers';
 
 export default function App() {
   return (
@@ -23,6 +24,7 @@ export default function App() {
             <Route path="suburbs/:id" element={<SuburbDetail />} />
             <Route path="my-listings" element={<MyListings />} />
             <Route path="my-buyers" element={<MyBuyers />} />
+            <Route path="admin/members" element={<AdminMembers />} />
           </Route>
         </Routes>
       </BrowserRouter>

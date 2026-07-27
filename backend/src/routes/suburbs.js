@@ -42,7 +42,7 @@ router.get('/:id', requireAuth, async (req, res) => {
       `SELECT l.*, u.first_name || ' ' || u.last_name AS agent_name, u.email AS agent_email,
               u.mobile_number AS agent_mobile, u.team AS agent_team
        FROM listings l JOIN users u ON u.id = l.agent_id
-       WHERE l.suburb_id = $1 AND l.expires_at > NOW() ORDER BY l.created_at DESC`,
+       WHERE l.suburb_id = $1 AND l.expires_at > NOW() ORDER BY l.price ASC`,
       [req.params.id]
     );
     const buyersResult = await db.query(
@@ -53,7 +53,7 @@ router.get('/:id', requireAuth, async (req, res) => {
        FROM buyers b
        JOIN buyer_suburbs bs ON bs.buyer_id = b.id AND bs.suburb_id = $1
        JOIN users u ON u.id = b.agent_id
-       WHERE b.expires_at > NOW() ORDER BY b.created_at DESC`,
+       WHERE b.expires_at > NOW() ORDER BY b.max_price ASC`,
       [req.params.id]
     );
 

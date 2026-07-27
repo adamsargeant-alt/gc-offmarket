@@ -11,6 +11,7 @@ const authRouter = require('./routes/auth');
 const suburbsRouter = require('./routes/suburbs');
 const listingsRouter = require('./routes/listings');
 const buyersRouter = require('./routes/buyers');
+const usersRouter = require('./routes/users');
 
 const app = express();
 
@@ -41,6 +42,7 @@ app.use('/api/auth', authRouter);
 app.use('/api/suburbs', suburbsRouter);
 app.use('/api/listings', listingsRouter);
 app.use('/api/buyers', buyersRouter);
+app.use('/api/users', usersRouter);
 
 // Health check
 app.get('/api/health', async (req, res) => {

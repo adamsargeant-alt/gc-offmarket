@@ -53,4 +53,10 @@ export const buyersApi = {
   delete: (id) => api.delete(`/buyers/${id}`),
 };
 
+// ── Users (admin) ──────────────────────────────────────────────────
+export const usersApi = {
+  list: () => api.get('/users'),
+  delete: (id) => api.delete(`/users/${id}`),
+};
+
 export default api;

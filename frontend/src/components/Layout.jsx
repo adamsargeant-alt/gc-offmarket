@@ -19,6 +19,9 @@ export default function Layout() {
           <NavLink to="/dashboard" className={({ isActive }) => isActive ? 'active' : ''}>Suburbs</NavLink>
           <NavLink to="/my-listings" className={({ isActive }) => isActive ? 'active' : ''}>My Listings</NavLink>
           <NavLink to="/my-buyers" className={({ isActive }) => isActive ? 'active' : ''}>My Buyers</NavLink>
+          {user?.role === 'admin' && (
+            <NavLink to="/admin/members" className={({ isActive }) => isActive ? 'active' : ''}>Members</NavLink>
+          )}
         </nav>
         <div className="topbar-user">
           <span>{user?.first_name} {user?.last_name}{user?.role === 'admin' ? ' · Admin' : ''}</span>
