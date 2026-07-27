@@ -181,6 +181,9 @@ a { color: var(--primary); text-decoration: none; }
   color: var(--text-primary);
 }
 .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.currency-input { position: relative; display: flex; align-items: center; }
+.currency-prefix { position: absolute; left: 10px; color: var(--text-muted); font-size: 14px; pointer-events: none; }
+.currency-input input { padding-left: 22px !important; width: 100%; }
 .form-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 4px; }
 
 /* ── Modal ── */

@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import CurrencyInput from './CurrencyInput';
 
 const PROPERTY_TYPES = ['House', 'Unit', 'Townhouse', 'Villa', 'Land'];
 const DURATIONS = [
@@ -56,7 +57,7 @@ export default function ListingForm({ suburbs, lockedSuburbId, initial, onSubmit
         </select>
       </label>
       <label>Price
-        <input type="number" min="0" step="1000" value={form.price} onChange={(e) => set('price', e.target.value)} required />
+        <CurrencyInput value={form.price} onChange={(v) => set('price', v)} required />
       </label>
       <label>Property type
         <select value={form.property_type} onChange={(e) => set('property_type', e.target.value)} required>

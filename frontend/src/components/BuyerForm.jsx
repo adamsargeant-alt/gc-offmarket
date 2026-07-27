@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import CurrencyInput from './CurrencyInput';
 
 const PROPERTY_TYPES = ['House', 'Unit', 'Townhouse', 'Villa', 'Land'];
 const DURATIONS = [
@@ -56,7 +57,7 @@ export default function BuyerForm({ suburbs, lockedSuburbId, initial, onSubmit, 
         </select>
       </label>
       <label>Max price (budget)
-        <input type="number" min="0" step="1000" value={form.max_price} onChange={(e) => set('max_price', e.target.value)} required />
+        <CurrencyInput value={form.max_price} onChange={(v) => set('max_price', v)} required />
       </label>
       <label>Property type
         <select value={form.property_type} onChange={(e) => set('property_type', e.target.value)} required>
