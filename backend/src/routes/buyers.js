@@ -3,7 +3,7 @@ const router = express.Router();
 const db = require('../config/database');
 const { requireAuth } = require('../middleware/auth');
 
-const PROPERTY_TYPES = ['House', 'Apartment', 'Townhouse', 'Villa', 'Land', 'Waterfront', 'Penthouse'];
+const PROPERTY_TYPES = ['House', 'Apartment', 'Townhouse', 'Villa', 'Land'];
 const FEATURES = ['Penthouse', 'Sub-penthouse', 'Waterfront', 'Pool', 'Multi-level'];
 const FACINGS = ['North', 'East', 'South', 'West'];
 const DURATION_DAYS = [3, 7, 14, 30];

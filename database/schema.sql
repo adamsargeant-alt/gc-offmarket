@@ -119,12 +119,23 @@ CREATE INDEX IF NOT EXISTS idx_buyer_suburbs_buyer ON buyer_suburbs(buyer_id);
 -- Widen property types on tables created before this list existed.
 UPDATE listings SET property_type = 'Apartment' WHERE property_type = 'Unit';
 UPDATE buyers SET property_type = 'Apartment' WHERE property_type = 'Unit';
+
+-- Waterfront/Penthouse moved from property_type to the features tick-box
+-- list — fold any existing values into features before re-tightening
+-- the type to just the 5 base types.
+UPDATE listings SET features = array_append(features, property_type)
+  WHERE property_type IN ('Waterfront', 'Penthouse') AND NOT (property_type = ANY(features));
+UPDATE buyers SET features = array_append(features, property_type)
+  WHERE property_type IN ('Waterfront', 'Penthouse') AND NOT (property_type = ANY(features));
+UPDATE listings SET property_type = 'House' WHERE property_type IN ('Waterfront', 'Penthouse');
+UPDATE buyers SET property_type = 'House' WHERE property_type IN ('Waterfront', 'Penthouse');
+
 ALTER TABLE listings DROP CONSTRAINT IF EXISTS listings_property_type_check;
 ALTER TABLE listings ADD CONSTRAINT listings_property_type_check
-  CHECK (property_type IN ('House', 'Apartment', 'Townhouse', 'Villa', 'Land', 'Waterfront', 'Penthouse'));
+  CHECK (property_type IN ('House', 'Apartment', 'Townhouse', 'Villa', 'Land'));
 ALTER TABLE buyers DROP CONSTRAINT IF EXISTS buyers_property_type_check;
 ALTER TABLE buyers ADD CONSTRAINT buyers_property_type_check
-  CHECK (property_type IN ('House', 'Apartment', 'Townhouse', 'Villa', 'Land', 'Waterfront', 'Penthouse'));
+  CHECK (property_type IN ('House', 'Apartment', 'Townhouse', 'Villa', 'Land'));
 
 -- ─── Seed Gold Coast suburbs ────────────────────────────────────────
 -- Placeholder list — replace/extend once the real list is provided.

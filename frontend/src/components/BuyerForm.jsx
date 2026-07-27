@@ -3,7 +3,7 @@ import CurrencyInput from './CurrencyInput';
 import SuburbAutocomplete from './SuburbAutocomplete';
 import CheckboxGroup from './CheckboxGroup';
 
-const PROPERTY_TYPES = ['House', 'Apartment', 'Townhouse', 'Villa', 'Land', 'Waterfront', 'Penthouse'];
+const PROPERTY_TYPES = ['House', 'Apartment', 'Townhouse', 'Villa', 'Land'];
 const FEATURES = ['Penthouse', 'Sub-penthouse', 'Waterfront', 'Pool', 'Multi-level'];
 const FACINGS = ['North', 'East', 'South', 'West'];
 const DURATIONS = [
