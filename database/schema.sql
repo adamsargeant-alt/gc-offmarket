@@ -21,7 +21,7 @@ CREATE TABLE IF NOT EXISTS listings (
   agent_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   suburb_id INTEGER NOT NULL REFERENCES suburbs(id),
   price NUMERIC(12, 0) NOT NULL,
-  property_type TEXT NOT NULL CHECK (property_type IN ('House', 'Unit', 'Townhouse', 'Villa', 'Land')),
+  property_type TEXT NOT NULL CHECK (property_type IN ('House', 'Apartment', 'Townhouse', 'Villa', 'Land', 'Waterfront', 'Penthouse')),
   bedrooms SMALLINT NOT NULL,
   bathrooms SMALLINT NOT NULL,
   notes TEXT,
@@ -39,7 +39,7 @@ CREATE TABLE IF NOT EXISTS buyers (
   agent_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   suburb_id INTEGER NOT NULL REFERENCES suburbs(id),
   max_price NUMERIC(12, 0) NOT NULL,
-  property_type TEXT NOT NULL CHECK (property_type IN ('House', 'Unit', 'Townhouse', 'Villa', 'Land')),
+  property_type TEXT NOT NULL CHECK (property_type IN ('House', 'Apartment', 'Townhouse', 'Villa', 'Land', 'Waterfront', 'Penthouse')),
   min_bedrooms SMALLINT NOT NULL,
   min_bathrooms SMALLINT NOT NULL,
   notes TEXT,
@@ -59,6 +59,16 @@ ALTER TABLE buyers ALTER COLUMN expires_at SET NOT NULL;
 
 CREATE INDEX IF NOT EXISTS idx_listings_suburb ON listings(suburb_id);
 CREATE INDEX IF NOT EXISTS idx_buyers_suburb ON buyers(suburb_id);
+
+-- Widen property types on tables created before this list existed.
+UPDATE listings SET property_type = 'Apartment' WHERE property_type = 'Unit';
+UPDATE buyers SET property_type = 'Apartment' WHERE property_type = 'Unit';
+ALTER TABLE listings DROP CONSTRAINT IF EXISTS listings_property_type_check;
+ALTER TABLE listings ADD CONSTRAINT listings_property_type_check
+  CHECK (property_type IN ('House', 'Apartment', 'Townhouse', 'Villa', 'Land', 'Waterfront', 'Penthouse'));
+ALTER TABLE buyers DROP CONSTRAINT IF EXISTS buyers_property_type_check;
+ALTER TABLE buyers ADD CONSTRAINT buyers_property_type_check
+  CHECK (property_type IN ('House', 'Apartment', 'Townhouse', 'Villa', 'Land', 'Waterfront', 'Penthouse'));
 
 -- ─── Seed Gold Coast suburbs ────────────────────────────────────────
 -- Placeholder list — replace/extend once the real list is provided.

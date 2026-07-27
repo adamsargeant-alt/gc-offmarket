@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import CurrencyInput from './CurrencyInput';
 
-const PROPERTY_TYPES = ['House', 'Unit', 'Townhouse', 'Villa', 'Land'];
+const PROPERTY_TYPES = ['House', 'Apartment', 'Townhouse', 'Villa', 'Land', 'Waterfront', 'Penthouse'];
 const DURATIONS = [
   { days: 3, label: '3 days' },
   { days: 7, label: '1 week' },

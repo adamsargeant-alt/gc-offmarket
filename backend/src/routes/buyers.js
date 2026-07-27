@@ -3,7 +3,7 @@ const router = express.Router();
 const db = require('../config/database');
 const { requireAuth } = require('../middleware/auth');
 
-const PROPERTY_TYPES = ['House', 'Unit', 'Townhouse', 'Villa', 'Land'];
+const PROPERTY_TYPES = ['House', 'Apartment', 'Townhouse', 'Villa', 'Land', 'Waterfront', 'Penthouse'];
 const DURATION_DAYS = [3, 7, 14, 30];
 
 function validate(body) {
