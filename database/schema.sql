@@ -76,5 +76,6 @@ INSERT INTO suburbs (name) VALUES
   ('Parkwood'), ('Pimpama'), ('Reedy Creek'), ('Robina'), ('Runaway Bay'),
   ('South Stradbroke'), ('Southport'), ('Springbrook'), ('Surfers Paradise'), ('Tallai'),
   ('Tallebudgera'), ('Tallebudgera Valley'), ('Tugun'), ('Upper Coomera'), ('Varsity Lakes'),
-  ('Willow Vale'), ('Worongary')
+  ('Willow Vale'), ('Worongary'),
+  ('Sorrento'), ('Isle of Capri'), ('Paradise Waters'), ('Benowa Waters'), ('Chevron Island')
 ON CONFLICT (name) DO NOTHING;
