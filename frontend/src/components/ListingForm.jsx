@@ -17,6 +17,7 @@ export default function ListingForm({ suburbs, lockedSuburbId, initial, onSubmit
     property_type: initial?.property_type || 'House',
     bedrooms: initial?.bedrooms ?? '',
     bathrooms: initial?.bathrooms ?? '',
+    land_size: initial?.land_size || '',
     notes: initial?.notes || '',
     duration_days: 7,
   });
@@ -38,6 +39,7 @@ export default function ListingForm({ suburbs, lockedSuburbId, initial, onSubmit
         property_type: form.property_type,
         bedrooms: Number(form.bedrooms),
         bathrooms: Number(form.bathrooms),
+        land_size: form.land_size,
         notes: form.notes,
         duration_days: Number(form.duration_days),
       });
@@ -72,6 +74,9 @@ export default function ListingForm({ suburbs, lockedSuburbId, initial, onSubmit
           <input type="number" min="0" value={form.bathrooms} onChange={(e) => set('bathrooms', e.target.value)} required />
         </label>
       </div>
+      <label>Approx land size (optional)
+        <input type="text" placeholder="e.g. 600m²" value={form.land_size} onChange={(e) => set('land_size', e.target.value)} />
+      </label>
       <label>Notes (optional)
         <textarea value={form.notes} onChange={(e) => set('notes', e.target.value)} rows={2} />
       </label>

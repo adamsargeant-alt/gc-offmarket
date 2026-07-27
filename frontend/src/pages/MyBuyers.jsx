@@ -45,7 +45,7 @@ export default function MyBuyers() {
         {buyers.map(b => (
           <div key={b.id} className="record-row">
             <div className="record-main">
-              <strong>{b.suburb_name}</strong> · up to {money(b.max_price)} · {b.property_type} · {b.min_bedrooms}+ bed / {b.min_bathrooms}+ bath
+              <strong>{b.suburbs.map(s => s.name).join(', ')}</strong> · up to {money(b.max_price)} · {b.property_type} · {b.min_bedrooms}+ bed / {b.min_bathrooms}+ bath
               {b.status !== 'active' && <span className="status-pill">{b.status}</span>}
               <span className="status-pill">expires in {daysLeft(b.expires_at)}d</span>
             </div>

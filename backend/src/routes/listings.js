@@ -36,14 +36,14 @@ router.post('/', requireAuth, async (req, res) => {
   const error = validate(req.body);
   if (error) return res.status(400).json({ error });
 
-  const { suburb_id, price, property_type, bedrooms, bathrooms, notes, duration_days } = req.body;
+  const { suburb_id, price, property_type, bedrooms, bathrooms, land_size, notes, duration_days } = req.body;
   if (!DURATION_DAYS.includes(Number(duration_days))) return res.status(400).json({ error: 'Invalid duration' });
 
   try {
     const result = await db.query(
-      `INSERT INTO listings (agent_id, suburb_id, price, property_type, bedrooms, bathrooms, notes, expires_at)
-       VALUES ($1,$2,$3,$4,$5,$6,$7, NOW() + ($8 || ' days')::INTERVAL) RETURNING *`,
-      [req.user.id, suburb_id, price, property_type, bedrooms, bathrooms, notes || null, duration_days]
+      `INSERT INTO listings (agent_id, suburb_id, price, property_type, bedrooms, bathrooms, land_size, notes, expires_at)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8, NOW() + ($9 || ' days')::INTERVAL) RETURNING *`,
+      [req.user.id, suburb_id, price, property_type, bedrooms, bathrooms, land_size || null, notes || null, duration_days]
     );
     res.status(201).json(result.rows[0]);
   } catch (err) {
@@ -63,11 +63,11 @@ router.put('/:id', requireAuth, async (req, res) => {
       return res.status(403).json({ error: 'You can only edit your own listings' });
     }
 
-    const { suburb_id, price, property_type, bedrooms, bathrooms, notes, status } = req.body;
+    const { suburb_id, price, property_type, bedrooms, bathrooms, land_size, notes, status } = req.body;
     const result = await db.query(
       `UPDATE listings SET suburb_id=$1, price=$2, property_type=$3, bedrooms=$4, bathrooms=$5,
-       notes=$6, status=COALESCE($7, status), updated_at=NOW() WHERE id=$8 RETURNING *`,
-      [suburb_id, price, property_type, bedrooms, bathrooms, notes || null, status || null, req.params.id]
+       land_size=$6, notes=$7, status=COALESCE($8, status), updated_at=NOW() WHERE id=$9 RETURNING *`,
+      [suburb_id, price, property_type, bedrooms, bathrooms, land_size || null, notes || null, status || null, req.params.id]
     );
     res.json(result.rows[0]);
   } catch (err) {

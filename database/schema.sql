@@ -48,6 +48,7 @@ CREATE TABLE IF NOT EXISTS listings (
   property_type TEXT NOT NULL CHECK (property_type IN ('House', 'Apartment', 'Townhouse', 'Villa', 'Land', 'Waterfront', 'Penthouse')),
   bedrooms SMALLINT NOT NULL,
   bathrooms SMALLINT NOT NULL,
+  land_size TEXT,
   notes TEXT,
   status TEXT NOT NULL DEFAULT 'active' CHECK (status IN ('active', 'withdrawn')),
   expires_at TIMESTAMPTZ NOT NULL,
@@ -56,16 +57,17 @@ CREATE TABLE IF NOT EXISTS listings (
 );
 
 -- ─── Buyers ─────────────────────────────────────────────────────────
--- Same 5 fields as listings so they match directly: suburb, max price,
--- property type, min bedrooms, min bathrooms.
+-- Same 5 fields as listings so they match directly: max price,
+-- property type, min bedrooms, min bathrooms. Suburbs live in the
+-- buyer_suburbs join table below (a buyer can pick up to 3).
 CREATE TABLE IF NOT EXISTS buyers (
   id SERIAL PRIMARY KEY,
   agent_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-  suburb_id INTEGER NOT NULL REFERENCES suburbs(id),
   max_price NUMERIC(12, 0) NOT NULL,
   property_type TEXT NOT NULL CHECK (property_type IN ('House', 'Apartment', 'Townhouse', 'Villa', 'Land', 'Waterfront', 'Penthouse')),
   min_bedrooms SMALLINT NOT NULL,
   min_bathrooms SMALLINT NOT NULL,
+  land_size TEXT,
   notes TEXT,
   status TEXT NOT NULL DEFAULT 'active' CHECK (status IN ('active', 'withdrawn')),
   expires_at TIMESTAMPTZ NOT NULL,
@@ -73,16 +75,38 @@ CREATE TABLE IF NOT EXISTS buyers (
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
--- Safety net for tables created before expiry support existed.
+CREATE TABLE IF NOT EXISTS buyer_suburbs (
+  buyer_id INTEGER NOT NULL REFERENCES buyers(id) ON DELETE CASCADE,
+  suburb_id INTEGER NOT NULL REFERENCES suburbs(id),
+  PRIMARY KEY (buyer_id, suburb_id)
+);
+
+-- Safety net for tables created before expiry/land-size/multi-suburb existed.
 ALTER TABLE listings ADD COLUMN IF NOT EXISTS expires_at TIMESTAMPTZ;
 ALTER TABLE buyers ADD COLUMN IF NOT EXISTS expires_at TIMESTAMPTZ;
+ALTER TABLE listings ADD COLUMN IF NOT EXISTS land_size TEXT;
+ALTER TABLE buyers ADD COLUMN IF NOT EXISTS land_size TEXT;
 UPDATE listings SET expires_at = created_at + INTERVAL '30 days' WHERE expires_at IS NULL;
 UPDATE buyers SET expires_at = created_at + INTERVAL '30 days' WHERE expires_at IS NULL;
 ALTER TABLE listings ALTER COLUMN expires_at SET NOT NULL;
 ALTER TABLE buyers ALTER COLUMN expires_at SET NOT NULL;
 
+-- Migrate buyers off a single suburb_id onto the buyer_suburbs join table.
+-- Runs on every startup, so buyers.suburb_id is only touched once, the
+-- first time it's still present.
+DO $$
+BEGIN
+  IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'buyers' AND column_name = 'suburb_id') THEN
+    INSERT INTO buyer_suburbs (buyer_id, suburb_id)
+      SELECT id, suburb_id FROM buyers WHERE suburb_id IS NOT NULL
+      ON CONFLICT DO NOTHING;
+    ALTER TABLE buyers DROP COLUMN suburb_id;
+  END IF;
+END $$;
+
 CREATE INDEX IF NOT EXISTS idx_listings_suburb ON listings(suburb_id);
-CREATE INDEX IF NOT EXISTS idx_buyers_suburb ON buyers(suburb_id);
+CREATE INDEX IF NOT EXISTS idx_buyer_suburbs_suburb ON buyer_suburbs(suburb_id);
+CREATE INDEX IF NOT EXISTS idx_buyer_suburbs_buyer ON buyer_suburbs(buyer_id);
 
 -- Widen property types on tables created before this list existed.
 UPDATE listings SET property_type = 'Apartment' WHERE property_type = 'Unit';

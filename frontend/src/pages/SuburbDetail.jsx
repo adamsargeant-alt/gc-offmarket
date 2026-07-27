@@ -20,13 +20,16 @@ export default function SuburbDetail() {
   const { id } = useParams();
   const { user } = useAuth();
   const [data, setData] = useState(null);
+  const [allSuburbs, setAllSuburbs] = useState([]);
   const [error, setError] = useState('');
   const [showListingForm, setShowListingForm] = useState(false);
   const [showBuyerForm, setShowBuyerForm] = useState(false);
 
   async function load() {
     try {
-      setData(await suburbsApi.get(id));
+      const [detail, suburbList] = await Promise.all([suburbsApi.get(id), suburbsApi.list()]);
+      setData(detail);
+      setAllSuburbs(suburbList);
     } catch (err) {
       setError(err.message);
     }
@@ -87,6 +90,7 @@ export default function SuburbDetail() {
                   <span>{l.property_type}</span>
                   <span>{l.bedrooms} bed</span>
                   <span>{l.bathrooms} bath</span>
+                  {l.land_size && <span>{l.land_size}</span>}
                 </div>
                 {l.notes && <div className="entity-notes">{l.notes}</div>}
                 <div className="entity-agent">Listed by {l.agent_name}{l.agent_team ? ` (${l.agent_team})` : ''} · <a href={`tel:${l.agent_mobile}`}>{l.agent_mobile}</a> · expires in {daysLeft(l.expires_at)}d</div>
@@ -117,7 +121,11 @@ export default function SuburbDetail() {
                   <span>{b.property_type}</span>
                   <span>{b.min_bedrooms}+ bed</span>
                   <span>{b.min_bathrooms}+ bath</span>
+                  {b.land_size && <span>{b.land_size}+</span>}
                 </div>
+                {b.all_suburbs && b.all_suburbs.length > 1 && (
+                  <div className="entity-notes">Also considering: {b.all_suburbs.filter(n => n !== suburb.name).join(', ')}</div>
+                )}
                 {b.notes && <div className="entity-notes">{b.notes}</div>}
                 <div className="entity-agent">Buyer via {b.agent_name}{b.agent_team ? ` (${b.agent_team})` : ''} · <a href={`tel:${b.agent_mobile}`}>{b.agent_mobile}</a> · expires in {daysLeft(b.expires_at)}d</div>
               </div>
@@ -141,7 +149,7 @@ export default function SuburbDetail() {
       )}
       {showBuyerForm && (
         <Modal title={`Add buyer for ${suburb.name}`} onClose={() => setShowBuyerForm(false)}>
-          <BuyerForm suburbs={[suburb]} lockedSuburbId={suburb.id} onSubmit={handleCreateBuyer} onCancel={() => setShowBuyerForm(false)} />
+          <BuyerForm suburbs={allSuburbs} lockedSuburbId={suburb.id} onSubmit={handleCreateBuyer} onCancel={() => setShowBuyerForm(false)} />
         </Modal>
       )}
     </div>

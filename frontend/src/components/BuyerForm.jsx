@@ -11,12 +11,16 @@ const DURATIONS = [
 
 export default function BuyerForm({ suburbs, lockedSuburbId, initial, onSubmit, onCancel }) {
   const isEdit = !!initial?.id;
+  const initialSuburbIds = initial?.suburbs?.map(s => s.id) || (lockedSuburbId ? [lockedSuburbId] : []);
   const [form, setForm] = useState({
-    suburb_id: initial?.suburb_id || lockedSuburbId || '',
+    suburb_id_1: initialSuburbIds[0] || lockedSuburbId || '',
+    suburb_id_2: initialSuburbIds[1] || '',
+    suburb_id_3: initialSuburbIds[2] || '',
     max_price: initial?.max_price || '',
     property_type: initial?.property_type || 'House',
     min_bedrooms: initial?.min_bedrooms ?? '',
     min_bathrooms: initial?.min_bathrooms ?? '',
+    land_size: initial?.land_size || '',
     notes: initial?.notes || '',
     duration_days: 7,
   });
@@ -27,17 +31,26 @@ export default function BuyerForm({ suburbs, lockedSuburbId, initial, onSubmit, 
     setForm(f => ({ ...f, [field]: value }));
   }
 
+  function optionsExcluding(...ids) {
+    const excluded = new Set(ids.filter(Boolean).map(Number));
+    return suburbs.filter(s => !excluded.has(s.id));
+  }
+
   async function handleSubmit(e) {
     e.preventDefault();
     setError('');
+    const suburb_ids = [form.suburb_id_1, form.suburb_id_2, form.suburb_id_3]
+      .filter(Boolean)
+      .map(Number);
     setBusy(true);
     try {
       await onSubmit({
-        suburb_id: Number(form.suburb_id),
+        suburb_ids,
         max_price: Number(form.max_price),
         property_type: form.property_type,
         min_bedrooms: Number(form.min_bedrooms),
         min_bathrooms: Number(form.min_bathrooms),
+        land_size: form.land_size,
         notes: form.notes,
         duration_days: Number(form.duration_days),
       });
@@ -50,10 +63,22 @@ export default function BuyerForm({ suburbs, lockedSuburbId, initial, onSubmit, 
   return (
     <form className="entity-form" onSubmit={handleSubmit}>
       {error && <div className="auth-error">{error}</div>}
-      <label>Suburb
-        <select value={form.suburb_id} onChange={(e) => set('suburb_id', e.target.value)} required disabled={!!lockedSuburbId}>
+      <label>Suburb (up to 3)
+        <select value={form.suburb_id_1} onChange={(e) => set('suburb_id_1', e.target.value)} required disabled={!!lockedSuburbId}>
           <option value="" disabled>Select suburb…</option>
-          {suburbs.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
+          {optionsExcluding(form.suburb_id_2, form.suburb_id_3).map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
+        </select>
+      </label>
+      <label>2nd suburb (optional)
+        <select value={form.suburb_id_2} onChange={(e) => set('suburb_id_2', e.target.value)}>
+          <option value="">— None —</option>
+          {optionsExcluding(form.suburb_id_1, form.suburb_id_3).map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
+        </select>
+      </label>
+      <label>3rd suburb (optional)
+        <select value={form.suburb_id_3} onChange={(e) => set('suburb_id_3', e.target.value)}>
+          <option value="">— None —</option>
+          {optionsExcluding(form.suburb_id_1, form.suburb_id_2).map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
         </select>
       </label>
       <label>Max price (budget)
@@ -72,6 +97,9 @@ export default function BuyerForm({ suburbs, lockedSuburbId, initial, onSubmit, 
           <input type="number" min="0" value={form.min_bathrooms} onChange={(e) => set('min_bathrooms', e.target.value)} required />
         </label>
       </div>
+      <label>Approx land size (optional)
+        <input type="text" placeholder="e.g. 600m²" value={form.land_size} onChange={(e) => set('land_size', e.target.value)} />
+      </label>
       <label>Notes (optional)
         <textarea value={form.notes} onChange={(e) => set('notes', e.target.value)} rows={2} />
       </label>

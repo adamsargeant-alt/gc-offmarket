@@ -21,7 +21,8 @@ router.get('/', requireAuth, async (req, res) => {
         COUNT(DISTINCT b.id) FILTER (WHERE b.status = 'active' AND b.expires_at > NOW()) AS buyer_count
       FROM suburbs s
       LEFT JOIN listings l ON l.suburb_id = s.id
-      LEFT JOIN buyers b ON b.suburb_id = s.id
+      LEFT JOIN buyer_suburbs bs ON bs.suburb_id = s.id
+      LEFT JOIN buyers b ON b.id = bs.buyer_id
       GROUP BY s.id, s.name
       ORDER BY s.name
     `);
@@ -46,9 +47,13 @@ router.get('/:id', requireAuth, async (req, res) => {
     );
     const buyersResult = await db.query(
       `SELECT b.*, u.first_name || ' ' || u.last_name AS agent_name, u.email AS agent_email,
-              u.mobile_number AS agent_mobile, u.team AS agent_team
-       FROM buyers b JOIN users u ON u.id = b.agent_id
-       WHERE b.suburb_id = $1 AND b.expires_at > NOW() ORDER BY b.created_at DESC`,
+              u.mobile_number AS agent_mobile, u.team AS agent_team,
+              (SELECT array_agg(s2.name ORDER BY s2.name) FROM buyer_suburbs bs2
+                 JOIN suburbs s2 ON s2.id = bs2.suburb_id WHERE bs2.buyer_id = b.id) AS all_suburbs
+       FROM buyers b
+       JOIN buyer_suburbs bs ON bs.buyer_id = b.id AND bs.suburb_id = $1
+       JOIN users u ON u.id = b.agent_id
+       WHERE b.expires_at > NOW() ORDER BY b.created_at DESC`,
       [req.params.id]
     );
 

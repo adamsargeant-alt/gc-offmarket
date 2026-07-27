@@ -7,8 +7,10 @@ const PROPERTY_TYPES = ['House', 'Apartment', 'Townhouse', 'Villa', 'Land', 'Wat
 const DURATION_DAYS = [3, 7, 14, 30];
 
 function validate(body) {
-  const { suburb_id, max_price, property_type, min_bedrooms, min_bathrooms } = body;
-  if (!suburb_id) return 'Suburb is required';
+  const { suburb_ids, max_price, property_type, min_bedrooms, min_bathrooms } = body;
+  if (!Array.isArray(suburb_ids) || !suburb_ids.length) return 'Pick at least one suburb';
+  if (suburb_ids.length > 3) return 'You can pick up to 3 suburbs';
+  if (new Set(suburb_ids).size !== suburb_ids.length) return 'Suburbs must be unique';
   if (!max_price || max_price <= 0) return 'Max price is required';
   if (!PROPERTY_TYPES.includes(property_type)) return 'Invalid property type';
   if (min_bedrooms === undefined || min_bedrooms < 0) return 'Min bedrooms is required';
@@ -16,13 +18,36 @@ function validate(body) {
   return null;
 }
 
+async function setBuyerSuburbs(buyerId, suburbIds) {
+  await db.query('DELETE FROM buyer_suburbs WHERE buyer_id = $1', [buyerId]);
+  for (const suburbId of suburbIds) {
+    await db.query('INSERT INTO buyer_suburbs (buyer_id, suburb_id) VALUES ($1, $2)', [buyerId, suburbId]);
+  }
+}
+
+async function withSuburbs(buyer) {
+  const result = await db.query(
+    `SELECT s.id, s.name FROM buyer_suburbs bs JOIN suburbs s ON s.id = bs.suburb_id
+     WHERE bs.buyer_id = $1 ORDER BY s.name`,
+    [buyer.id]
+  );
+  return { ...buyer, suburbs: result.rows };
+}
+
 // ─── MY buyers ──────────────────────────────────────────────────────
 router.get('/mine', requireAuth, async (req, res) => {
   try {
     const result = await db.query(
-      `SELECT b.*, s.name AS suburb_name FROM buyers b
-       JOIN suburbs s ON s.id = b.suburb_id
-       WHERE b.agent_id = $1 AND b.expires_at > NOW() ORDER BY b.created_at DESC`,
+      `SELECT b.*, COALESCE(
+         json_agg(jsonb_build_object('id', s.id, 'name', s.name) ORDER BY s.name) FILTER (WHERE s.id IS NOT NULL),
+         '[]'
+       ) AS suburbs
+       FROM buyers b
+       LEFT JOIN buyer_suburbs bs ON bs.buyer_id = b.id
+       LEFT JOIN suburbs s ON s.id = bs.suburb_id
+       WHERE b.agent_id = $1 AND b.expires_at > NOW()
+       GROUP BY b.id
+       ORDER BY b.created_at DESC`,
       [req.user.id]
     );
     res.json(result.rows);
@@ -36,16 +61,18 @@ router.post('/', requireAuth, async (req, res) => {
   const error = validate(req.body);
   if (error) return res.status(400).json({ error });
 
-  const { suburb_id, max_price, property_type, min_bedrooms, min_bathrooms, notes, duration_days } = req.body;
+  const { suburb_ids, max_price, property_type, min_bedrooms, min_bathrooms, land_size, notes, duration_days } = req.body;
   if (!DURATION_DAYS.includes(Number(duration_days))) return res.status(400).json({ error: 'Invalid duration' });
 
   try {
     const result = await db.query(
-      `INSERT INTO buyers (agent_id, suburb_id, max_price, property_type, min_bedrooms, min_bathrooms, notes, expires_at)
+      `INSERT INTO buyers (agent_id, max_price, property_type, min_bedrooms, min_bathrooms, land_size, notes, expires_at)
        VALUES ($1,$2,$3,$4,$5,$6,$7, NOW() + ($8 || ' days')::INTERVAL) RETURNING *`,
-      [req.user.id, suburb_id, max_price, property_type, min_bedrooms, min_bathrooms, notes || null, duration_days]
+      [req.user.id, max_price, property_type, min_bedrooms, min_bathrooms, land_size || null, notes || null, duration_days]
     );
-    res.status(201).json(result.rows[0]);
+    const buyer = result.rows[0];
+    await setBuyerSuburbs(buyer.id, suburb_ids);
+    res.status(201).json(await withSuburbs(buyer));
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -63,13 +90,14 @@ router.put('/:id', requireAuth, async (req, res) => {
       return res.status(403).json({ error: 'You can only edit your own buyers' });
     }
 
-    const { suburb_id, max_price, property_type, min_bedrooms, min_bathrooms, notes, status } = req.body;
+    const { suburb_ids, max_price, property_type, min_bedrooms, min_bathrooms, land_size, notes, status } = req.body;
     const result = await db.query(
-      `UPDATE buyers SET suburb_id=$1, max_price=$2, property_type=$3, min_bedrooms=$4, min_bathrooms=$5,
-       notes=$6, status=COALESCE($7, status), updated_at=NOW() WHERE id=$8 RETURNING *`,
-      [suburb_id, max_price, property_type, min_bedrooms, min_bathrooms, notes || null, status || null, req.params.id]
+      `UPDATE buyers SET max_price=$1, property_type=$2, min_bedrooms=$3, min_bathrooms=$4,
+       land_size=$5, notes=$6, status=COALESCE($7, status), updated_at=NOW() WHERE id=$8 RETURNING *`,
+      [max_price, property_type, min_bedrooms, min_bathrooms, land_size || null, notes || null, status || null, req.params.id]
     );
-    res.json(result.rows[0]);
+    await setBuyerSuburbs(req.params.id, suburb_ids);
+    res.json(await withSuburbs(result.rows[0]));
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
