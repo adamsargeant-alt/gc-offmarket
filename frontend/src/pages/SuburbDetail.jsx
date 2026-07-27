@@ -12,6 +12,10 @@ function canManage(entity, user) {
   return user && (user.role === 'admin' || entity.agent_id === user.id);
 }
 
+function daysLeft(expiresAt) {
+  return Math.max(0, Math.ceil((new Date(expiresAt) - new Date()) / (1000 * 60 * 60 * 24)));
+}
+
 export default function SuburbDetail() {
   const { id } = useParams();
   const { user } = useAuth();
@@ -85,7 +89,7 @@ export default function SuburbDetail() {
                   <span>{l.bathrooms} bath</span>
                 </div>
                 {l.notes && <div className="entity-notes">{l.notes}</div>}
-                <div className="entity-agent">Listed by {l.agent_name}</div>
+                <div className="entity-agent">Listed by {l.agent_name} · expires in {daysLeft(l.expires_at)}d</div>
               </div>
               <div className="entity-card-side">
                 {l.matching_buyer_ids.length > 0
@@ -115,7 +119,7 @@ export default function SuburbDetail() {
                   <span>{b.min_bathrooms}+ bath</span>
                 </div>
                 {b.notes && <div className="entity-notes">{b.notes}</div>}
-                <div className="entity-agent">Buyer via {b.agent_name}</div>
+                <div className="entity-agent">Buyer via {b.agent_name} · expires in {daysLeft(b.expires_at)}d</div>
               </div>
               <div className="entity-card-side">
                 {b.matching_listing_ids.length > 0

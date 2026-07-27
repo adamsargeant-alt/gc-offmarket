@@ -4,6 +4,7 @@ const db = require('../config/database');
 const { requireAuth } = require('../middleware/auth');
 
 const PROPERTY_TYPES = ['House', 'Unit', 'Townhouse', 'Villa', 'Land'];
+const DURATION_DAYS = [3, 7, 14, 30];
 
 function validate(body) {
   const { suburb_id, max_price, property_type, min_bedrooms, min_bathrooms } = body;
@@ -21,7 +22,7 @@ router.get('/mine', requireAuth, async (req, res) => {
     const result = await db.query(
       `SELECT b.*, s.name AS suburb_name FROM buyers b
        JOIN suburbs s ON s.id = b.suburb_id
-       WHERE b.agent_id = $1 ORDER BY b.created_at DESC`,
+       WHERE b.agent_id = $1 AND b.expires_at > NOW() ORDER BY b.created_at DESC`,
       [req.user.id]
     );
     res.json(result.rows);
@@ -35,12 +36,14 @@ router.post('/', requireAuth, async (req, res) => {
   const error = validate(req.body);
   if (error) return res.status(400).json({ error });
 
-  const { suburb_id, max_price, property_type, min_bedrooms, min_bathrooms, notes } = req.body;
+  const { suburb_id, max_price, property_type, min_bedrooms, min_bathrooms, notes, duration_days } = req.body;
+  if (!DURATION_DAYS.includes(Number(duration_days))) return res.status(400).json({ error: 'Invalid duration' });
+
   try {
     const result = await db.query(
-      `INSERT INTO buyers (agent_id, suburb_id, max_price, property_type, min_bedrooms, min_bathrooms, notes)
-       VALUES ($1,$2,$3,$4,$5,$6,$7) RETURNING *`,
-      [req.user.id, suburb_id, max_price, property_type, min_bedrooms, min_bathrooms, notes || null]
+      `INSERT INTO buyers (agent_id, suburb_id, max_price, property_type, min_bedrooms, min_bathrooms, notes, expires_at)
+       VALUES ($1,$2,$3,$4,$5,$6,$7, NOW() + ($8 || ' days')::INTERVAL) RETURNING *`,
+      [req.user.id, suburb_id, max_price, property_type, min_bedrooms, min_bathrooms, notes || null, duration_days]
     );
     res.status(201).json(result.rows[0]);
   } catch (err) {

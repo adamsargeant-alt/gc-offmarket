@@ -17,8 +17,8 @@ router.get('/', requireAuth, async (req, res) => {
   try {
     const result = await db.query(`
       SELECT s.id, s.name,
-        COUNT(DISTINCT l.id) FILTER (WHERE l.status = 'active') AS listing_count,
-        COUNT(DISTINCT b.id) FILTER (WHERE b.status = 'active') AS buyer_count
+        COUNT(DISTINCT l.id) FILTER (WHERE l.status = 'active' AND l.expires_at > NOW()) AS listing_count,
+        COUNT(DISTINCT b.id) FILTER (WHERE b.status = 'active' AND b.expires_at > NOW()) AS buyer_count
       FROM suburbs s
       LEFT JOIN listings l ON l.suburb_id = s.id
       LEFT JOIN buyers b ON b.suburb_id = s.id
@@ -40,13 +40,13 @@ router.get('/:id', requireAuth, async (req, res) => {
     const listingsResult = await db.query(
       `SELECT l.*, u.name AS agent_name, u.email AS agent_email
        FROM listings l JOIN users u ON u.id = l.agent_id
-       WHERE l.suburb_id = $1 ORDER BY l.created_at DESC`,
+       WHERE l.suburb_id = $1 AND l.expires_at > NOW() ORDER BY l.created_at DESC`,
       [req.params.id]
     );
     const buyersResult = await db.query(
       `SELECT b.*, u.name AS agent_name, u.email AS agent_email
        FROM buyers b JOIN users u ON u.id = b.agent_id
-       WHERE b.suburb_id = $1 ORDER BY b.created_at DESC`,
+       WHERE b.suburb_id = $1 AND b.expires_at > NOW() ORDER BY b.created_at DESC`,
       [req.params.id]
     );
 

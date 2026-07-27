@@ -1,8 +1,15 @@
 import React, { useState } from 'react';
 
 const PROPERTY_TYPES = ['House', 'Unit', 'Townhouse', 'Villa', 'Land'];
+const DURATIONS = [
+  { days: 3, label: '3 days' },
+  { days: 7, label: '1 week' },
+  { days: 14, label: '2 weeks' },
+  { days: 30, label: '1 month' },
+];
 
 export default function ListingForm({ suburbs, lockedSuburbId, initial, onSubmit, onCancel }) {
+  const isEdit = !!initial?.id;
   const [form, setForm] = useState({
     suburb_id: initial?.suburb_id || lockedSuburbId || '',
     price: initial?.price || '',
@@ -10,6 +17,7 @@ export default function ListingForm({ suburbs, lockedSuburbId, initial, onSubmit
     bedrooms: initial?.bedrooms ?? '',
     bathrooms: initial?.bathrooms ?? '',
     notes: initial?.notes || '',
+    duration_days: 7,
   });
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
@@ -30,6 +38,7 @@ export default function ListingForm({ suburbs, lockedSuburbId, initial, onSubmit
         bedrooms: Number(form.bedrooms),
         bathrooms: Number(form.bathrooms),
         notes: form.notes,
+        duration_days: Number(form.duration_days),
       });
     } catch (err) {
       setError(err.message);
@@ -65,6 +74,13 @@ export default function ListingForm({ suburbs, lockedSuburbId, initial, onSubmit
       <label>Notes (optional)
         <textarea value={form.notes} onChange={(e) => set('notes', e.target.value)} rows={2} />
       </label>
+      {!isEdit && (
+        <label>How long should this stay listed?
+          <select value={form.duration_days} onChange={(e) => set('duration_days', e.target.value)} required>
+            {DURATIONS.map(d => <option key={d.days} value={d.days}>{d.label}</option>)}
+          </select>
+        </label>
+      )}
       <div className="form-actions">
         <button type="button" className="btn btn-secondary" onClick={onCancel}>Cancel</button>
         <button type="submit" className="btn btn-primary" disabled={busy}>{busy ? 'Saving…' : 'Save listing'}</button>

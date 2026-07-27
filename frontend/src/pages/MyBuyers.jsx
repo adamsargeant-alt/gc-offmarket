@@ -4,6 +4,7 @@ import Modal from '../components/Modal';
 import BuyerForm from '../components/BuyerForm';
 
 const money = (n) => `$${Number(n).toLocaleString()}`;
+const daysLeft = (expiresAt) => Math.max(0, Math.ceil((new Date(expiresAt) - new Date()) / (1000 * 60 * 60 * 24)));
 
 export default function MyBuyers() {
   const [buyers, setBuyers] = useState([]);
@@ -46,6 +47,7 @@ export default function MyBuyers() {
             <div className="record-main">
               <strong>{b.suburb_name}</strong> · up to {money(b.max_price)} · {b.property_type} · {b.min_bedrooms}+ bed / {b.min_bathrooms}+ bath
               {b.status !== 'active' && <span className="status-pill">{b.status}</span>}
+              <span className="status-pill">expires in {daysLeft(b.expires_at)}d</span>
             </div>
             <div className="record-actions">
               <button className="btn btn-secondary btn-sm" onClick={() => setEditing(b)}>Edit</button>

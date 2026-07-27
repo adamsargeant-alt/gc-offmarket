@@ -66,6 +66,33 @@ async function initDB() {
   }
 }
 
+// Permanently purge listings/buyers past their chosen expiry.
+// Rows are already excluded from every query once expired (expires_at > NOW()
+// filters), so this just needs to run periodically to reclaim the space —
+// once a week, Sunday night, is plenty.
+async function purgeExpired() {
+  try {
+    const listings = await db.query('DELETE FROM listings WHERE expires_at <= NOW()');
+    const buyers = await db.query('DELETE FROM buyers WHERE expires_at <= NOW()');
+    if (listings.rowCount || buyers.rowCount) {
+      console.log(`🧹 Purged ${listings.rowCount} expired listing(s), ${buyers.rowCount} expired buyer(s)`);
+    }
+  } catch (err) {
+    console.error('⚠️  Purge expired warning:', err.message);
+  }
+}
+
+let lastPurgeDay = null;
+function maybePurgeExpired() {
+  const now = new Date();
+  const isSundayNight = now.getUTCDay() === 0 && now.getUTCHours() === 0;
+  const todayKey = now.toISOString().slice(0, 10);
+  if (isSundayNight && lastPurgeDay !== todayKey) {
+    lastPurgeDay = todayKey;
+    purgeExpired();
+  }
+}
+
 // Catch-all: serve React app for any non-API route (production)
 if (isProd && fs.existsSync(FRONTEND_DIST)) {
   app.get('*', (req, res) => {
@@ -82,6 +109,8 @@ app.use((err, req, res, next) => {
 const PORT = process.env.PORT || 3001;
 
 initDB().then(() => {
+  maybePurgeExpired();
+  setInterval(maybePurgeExpired, 60 * 60 * 1000); // check hourly, purge only runs Sunday night
   app.listen(PORT, () => {
     console.log(`🚀 GC Off-Market API running on http://localhost:${PORT}`);
   });

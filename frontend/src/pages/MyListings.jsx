@@ -4,6 +4,7 @@ import Modal from '../components/Modal';
 import ListingForm from '../components/ListingForm';
 
 const money = (n) => `$${Number(n).toLocaleString()}`;
+const daysLeft = (expiresAt) => Math.max(0, Math.ceil((new Date(expiresAt) - new Date()) / (1000 * 60 * 60 * 24)));
 
 export default function MyListings() {
   const [listings, setListings] = useState([]);
@@ -46,6 +47,7 @@ export default function MyListings() {
             <div className="record-main">
               <strong>{l.suburb_name}</strong> · {money(l.price)} · {l.property_type} · {l.bedrooms} bed / {l.bathrooms} bath
               {l.status !== 'active' && <span className="status-pill">{l.status}</span>}
+              <span className="status-pill">expires in {daysLeft(l.expires_at)}d</span>
             </div>
             <div className="record-actions">
               <button className="btn btn-secondary btn-sm" onClick={() => setEditing(l)}>Edit</button>
