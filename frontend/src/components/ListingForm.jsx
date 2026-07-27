@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import CurrencyInput from './CurrencyInput';
+import SuburbAutocomplete from './SuburbAutocomplete';
 
 const PROPERTY_TYPES = ['House', 'Apartment', 'Townhouse', 'Villa', 'Land', 'Waterfront', 'Penthouse'];
 const DURATIONS = [
@@ -53,10 +54,7 @@ export default function ListingForm({ suburbs, lockedSuburbId, initial, onSubmit
     <form className="entity-form" onSubmit={handleSubmit}>
       {error && <div className="auth-error">{error}</div>}
       <label>Suburb
-        <select value={form.suburb_id} onChange={(e) => set('suburb_id', e.target.value)} required disabled={!!lockedSuburbId}>
-          <option value="" disabled>Select suburb…</option>
-          {suburbs.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
-        </select>
+        <SuburbAutocomplete suburbs={suburbs} value={form.suburb_id} onChange={(id) => set('suburb_id', id)} required disabled={!!lockedSuburbId} />
       </label>
       <label>Price
         <CurrencyInput value={form.price} onChange={(v) => set('price', v)} required />

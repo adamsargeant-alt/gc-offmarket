@@ -194,6 +194,23 @@ a { color: var(--primary); text-decoration: none; }
 }
 .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 .form-row > label { min-width: 0; }
+.suburb-autocomplete { position: relative; }
+.suburb-autocomplete-list {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  background: var(--surface);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-md);
+  max-height: 220px;
+  overflow-y: auto;
+  z-index: 30;
+}
+.suburb-autocomplete-option { padding: 8px 12px; font-size: 14px; cursor: pointer; }
+.suburb-autocomplete-option:hover { background: var(--bg); }
+.suburb-autocomplete-empty { padding: 8px 12px; font-size: 13px; color: var(--text-muted); }
 .currency-input { position: relative; display: flex; align-items: center; }
 .currency-prefix { position: absolute; left: 10px; color: var(--text-muted); font-size: 14px; pointer-events: none; }
 .currency-input input { padding-left: 22px !important; width: 100%; }

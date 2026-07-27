@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import CurrencyInput from './CurrencyInput';
+import SuburbAutocomplete from './SuburbAutocomplete';
 
 const PROPERTY_TYPES = ['House', 'Apartment', 'Townhouse', 'Villa', 'Land', 'Waterfront', 'Penthouse'];
 const DURATIONS = [
@@ -31,11 +32,6 @@ export default function BuyerForm({ suburbs, lockedSuburbId, initial, onSubmit, 
     setForm(f => ({ ...f, [field]: value }));
   }
 
-  function optionsExcluding(...ids) {
-    const excluded = new Set(ids.filter(Boolean).map(Number));
-    return suburbs.filter(s => !excluded.has(s.id));
-  }
-
   async function handleSubmit(e) {
     e.preventDefault();
     setError('');
@@ -64,22 +60,32 @@ export default function BuyerForm({ suburbs, lockedSuburbId, initial, onSubmit, 
     <form className="entity-form" onSubmit={handleSubmit}>
       {error && <div className="auth-error">{error}</div>}
       <label>Suburb (up to 3)
-        <select value={form.suburb_id_1} onChange={(e) => set('suburb_id_1', e.target.value)} required disabled={!!lockedSuburbId}>
-          <option value="" disabled>Select suburb…</option>
-          {optionsExcluding(form.suburb_id_2, form.suburb_id_3).map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
-        </select>
+        <SuburbAutocomplete
+          suburbs={suburbs}
+          value={form.suburb_id_1}
+          onChange={(id) => set('suburb_id_1', id)}
+          excludeIds={[form.suburb_id_2, form.suburb_id_3]}
+          required
+          disabled={!!lockedSuburbId}
+        />
       </label>
       <label>2nd suburb (optional)
-        <select value={form.suburb_id_2} onChange={(e) => set('suburb_id_2', e.target.value)}>
-          <option value="">— None —</option>
-          {optionsExcluding(form.suburb_id_1, form.suburb_id_3).map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
-        </select>
+        <SuburbAutocomplete
+          suburbs={suburbs}
+          value={form.suburb_id_2}
+          onChange={(id) => set('suburb_id_2', id)}
+          excludeIds={[form.suburb_id_1, form.suburb_id_3]}
+          placeholder="— None —"
+        />
       </label>
       <label>3rd suburb (optional)
-        <select value={form.suburb_id_3} onChange={(e) => set('suburb_id_3', e.target.value)}>
-          <option value="">— None —</option>
-          {optionsExcluding(form.suburb_id_1, form.suburb_id_2).map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
-        </select>
+        <SuburbAutocomplete
+          suburbs={suburbs}
+          value={form.suburb_id_3}
+          onChange={(id) => set('suburb_id_3', id)}
+          excludeIds={[form.suburb_id_1, form.suburb_id_2]}
+          placeholder="— None —"
+        />
       </label>
       <label>Max price (budget)
         <CurrencyInput value={form.max_price} onChange={(v) => set('max_price', v)} required />
