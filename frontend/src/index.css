@@ -193,7 +193,24 @@ a { color: var(--primary); text-decoration: none; }
   color: var(--text-primary);
 }
 .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-.form-row > label { min-width: 0; }
+.form-row-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+.form-row > label, .form-row-3 > label { min-width: 0; }
+.checkbox-group { display: flex; flex-wrap: wrap; gap: 8px; }
+.checkbox-pill {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border: 1px solid var(--border-strong);
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 400 !important;
+  color: var(--text-primary) !important;
+  cursor: pointer;
+  user-select: none;
+}
+.checkbox-pill input { width: auto !important; cursor: pointer; }
 .suburb-autocomplete { position: relative; }
 .suburb-autocomplete-list {
   position: absolute;

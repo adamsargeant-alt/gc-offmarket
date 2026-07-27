@@ -91,6 +91,14 @@ UPDATE buyers SET expires_at = created_at + INTERVAL '30 days' WHERE expires_at 
 ALTER TABLE listings ALTER COLUMN expires_at SET NOT NULL;
 ALTER TABLE buyers ALTER COLUMN expires_at SET NOT NULL;
 
+-- Feature tags, facing, and car spaces — informational only, not used for matching.
+ALTER TABLE listings ADD COLUMN IF NOT EXISTS features TEXT[] NOT NULL DEFAULT '{}';
+ALTER TABLE buyers ADD COLUMN IF NOT EXISTS features TEXT[] NOT NULL DEFAULT '{}';
+ALTER TABLE listings ADD COLUMN IF NOT EXISTS facing TEXT[] NOT NULL DEFAULT '{}';
+ALTER TABLE buyers ADD COLUMN IF NOT EXISTS facing TEXT[] NOT NULL DEFAULT '{}';
+ALTER TABLE listings ADD COLUMN IF NOT EXISTS car_spaces SMALLINT;
+ALTER TABLE buyers ADD COLUMN IF NOT EXISTS car_spaces SMALLINT;
+
 -- Migrate buyers off a single suburb_id onto the buyer_suburbs join table.
 -- Runs on every startup, so buyers.suburb_id is only touched once, the
 -- first time it's still present.

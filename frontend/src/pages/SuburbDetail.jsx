@@ -90,7 +90,10 @@ export default function SuburbDetail() {
                   <span>{l.property_type}</span>
                   <span>{l.bedrooms} bed</span>
                   <span>{l.bathrooms} bath</span>
+                  {l.car_spaces != null && <span>{l.car_spaces} car</span>}
                   {l.land_size && <span>{l.land_size}</span>}
+                  {l.features?.map(f => <span key={f}>{f}</span>)}
+                  {l.facing?.length > 0 && <span>Facing {l.facing.join('/')}</span>}
                 </div>
                 {l.notes && <div className="entity-notes">{l.notes}</div>}
                 <div className="entity-agent">Listed by {l.agent_name}{l.agent_team ? ` (${l.agent_team})` : ''} · <a href={`tel:${l.agent_mobile}`}>{l.agent_mobile}</a> · expires in {daysLeft(l.expires_at)}d</div>
@@ -121,7 +124,10 @@ export default function SuburbDetail() {
                   <span>{b.property_type}</span>
                   <span>{b.min_bedrooms}+ bed</span>
                   <span>{b.min_bathrooms}+ bath</span>
+                  {b.car_spaces != null && <span>{b.car_spaces}+ car</span>}
                   {b.land_size && <span>{b.land_size}+</span>}
+                  {b.features?.map(f => <span key={f}>{f}</span>)}
+                  {b.facing?.length > 0 && <span>Facing {b.facing.join('/')}</span>}
                 </div>
                 {b.all_suburbs && b.all_suburbs.length > 1 && (
                   <div className="entity-notes">Also considering: {b.all_suburbs.filter(n => n !== suburb.name).join(', ')}</div>

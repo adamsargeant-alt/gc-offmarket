@@ -4,10 +4,17 @@ const db = require('../config/database');
 const { requireAuth } = require('../middleware/auth');
 
 const PROPERTY_TYPES = ['House', 'Apartment', 'Townhouse', 'Villa', 'Land', 'Waterfront', 'Penthouse'];
+const FEATURES = ['Penthouse', 'Sub-penthouse', 'Waterfront', 'Pool', 'Multi-level'];
+const FACINGS = ['North', 'East', 'South', 'West'];
 const DURATION_DAYS = [3, 7, 14, 30];
 
+function cleanTags(values, allowed) {
+  if (!Array.isArray(values)) return [];
+  return [...new Set(values.filter(v => allowed.includes(v)))];
+}
+
 function validate(body) {
-  const { suburb_ids, max_price, property_type, min_bedrooms, min_bathrooms } = body;
+  const { suburb_ids, max_price, property_type, min_bedrooms, min_bathrooms, car_spaces } = body;
   if (!Array.isArray(suburb_ids) || !suburb_ids.length) return 'Pick at least one suburb';
   if (suburb_ids.length > 3) return 'You can pick up to 3 suburbs';
   if (new Set(suburb_ids).size !== suburb_ids.length) return 'Suburbs must be unique';
@@ -15,6 +22,7 @@ function validate(body) {
   if (!PROPERTY_TYPES.includes(property_type)) return 'Invalid property type';
   if (min_bedrooms === undefined || min_bedrooms < 0) return 'Min bedrooms is required';
   if (min_bathrooms === undefined || min_bathrooms < 0) return 'Min bathrooms is required';
+  if (car_spaces !== undefined && car_spaces !== null && car_spaces !== '' && car_spaces < 0) return 'Invalid car spaces';
   return null;
 }
 
@@ -61,14 +69,15 @@ router.post('/', requireAuth, async (req, res) => {
   const error = validate(req.body);
   if (error) return res.status(400).json({ error });
 
-  const { suburb_ids, max_price, property_type, min_bedrooms, min_bathrooms, land_size, notes, duration_days } = req.body;
+  const { suburb_ids, max_price, property_type, min_bedrooms, min_bathrooms, land_size, features, facing, car_spaces, notes, duration_days } = req.body;
   if (!DURATION_DAYS.includes(Number(duration_days))) return res.status(400).json({ error: 'Invalid duration' });
 
   try {
     const result = await db.query(
-      `INSERT INTO buyers (agent_id, max_price, property_type, min_bedrooms, min_bathrooms, land_size, notes, expires_at)
-       VALUES ($1,$2,$3,$4,$5,$6,$7, NOW() + ($8 || ' days')::INTERVAL) RETURNING *`,
-      [req.user.id, max_price, property_type, min_bedrooms, min_bathrooms, land_size || null, notes || null, duration_days]
+      `INSERT INTO buyers (agent_id, max_price, property_type, min_bedrooms, min_bathrooms, land_size, features, facing, car_spaces, notes, expires_at)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10, NOW() + ($11 || ' days')::INTERVAL) RETURNING *`,
+      [req.user.id, max_price, property_type, min_bedrooms, min_bathrooms, land_size || null,
+       cleanTags(features, FEATURES), cleanTags(facing, FACINGS), car_spaces || null, notes || null, duration_days]
     );
     const buyer = result.rows[0];
     await setBuyerSuburbs(buyer.id, suburb_ids);
@@ -90,11 +99,12 @@ router.put('/:id', requireAuth, async (req, res) => {
       return res.status(403).json({ error: 'You can only edit your own buyers' });
     }
 
-    const { suburb_ids, max_price, property_type, min_bedrooms, min_bathrooms, land_size, notes, status } = req.body;
+    const { suburb_ids, max_price, property_type, min_bedrooms, min_bathrooms, land_size, features, facing, car_spaces, notes, status } = req.body;
     const result = await db.query(
       `UPDATE buyers SET max_price=$1, property_type=$2, min_bedrooms=$3, min_bathrooms=$4,
-       land_size=$5, notes=$6, status=COALESCE($7, status), updated_at=NOW() WHERE id=$8 RETURNING *`,
-      [max_price, property_type, min_bedrooms, min_bathrooms, land_size || null, notes || null, status || null, req.params.id]
+       land_size=$5, features=$6, facing=$7, car_spaces=$8, notes=$9, status=COALESCE($10, status), updated_at=NOW() WHERE id=$11 RETURNING *`,
+      [max_price, property_type, min_bedrooms, min_bathrooms, land_size || null,
+       cleanTags(features, FEATURES), cleanTags(facing, FACINGS), car_spaces || null, notes || null, status || null, req.params.id]
     );
     await setBuyerSuburbs(req.params.id, suburb_ids);
     res.json(await withSuburbs(result.rows[0]));

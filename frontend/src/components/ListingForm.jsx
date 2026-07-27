@@ -1,8 +1,11 @@
 import React, { useState } from 'react';
 import CurrencyInput from './CurrencyInput';
 import SuburbAutocomplete from './SuburbAutocomplete';
+import CheckboxGroup from './CheckboxGroup';
 
 const PROPERTY_TYPES = ['House', 'Apartment', 'Townhouse', 'Villa', 'Land', 'Waterfront', 'Penthouse'];
+const FEATURES = ['Penthouse', 'Sub-penthouse', 'Waterfront', 'Pool', 'Multi-level'];
+const FACINGS = ['North', 'East', 'South', 'West'];
 const DURATIONS = [
   { days: 3, label: '3 days' },
   { days: 7, label: '1 week' },
@@ -18,7 +21,10 @@ export default function ListingForm({ suburbs, lockedSuburbId, initial, onSubmit
     property_type: initial?.property_type || 'House',
     bedrooms: initial?.bedrooms ?? '',
     bathrooms: initial?.bathrooms ?? '',
+    car_spaces: initial?.car_spaces ?? '',
     land_size: initial?.land_size || '',
+    features: initial?.features || [],
+    facing: initial?.facing || [],
     notes: initial?.notes || '',
     duration_days: 7,
   });
@@ -40,7 +46,10 @@ export default function ListingForm({ suburbs, lockedSuburbId, initial, onSubmit
         property_type: form.property_type,
         bedrooms: Number(form.bedrooms),
         bathrooms: Number(form.bathrooms),
+        car_spaces: form.car_spaces === '' ? null : Number(form.car_spaces),
         land_size: form.land_size,
+        features: form.features,
+        facing: form.facing,
         notes: form.notes,
         duration_days: Number(form.duration_days),
       });
@@ -64,16 +73,25 @@ export default function ListingForm({ suburbs, lockedSuburbId, initial, onSubmit
           {PROPERTY_TYPES.map(t => <option key={t} value={t}>{t}</option>)}
         </select>
       </label>
-      <div className="form-row">
+      <div className="form-row-3">
         <label>Bedrooms
           <input type="number" min="0" value={form.bedrooms} onChange={(e) => set('bedrooms', e.target.value)} required />
         </label>
         <label>Bathrooms
           <input type="number" min="0" value={form.bathrooms} onChange={(e) => set('bathrooms', e.target.value)} required />
         </label>
+        <label>Car spaces
+          <input type="number" min="0" value={form.car_spaces} onChange={(e) => set('car_spaces', e.target.value)} />
+        </label>
       </div>
       <label>Approx land size (optional)
         <input type="text" placeholder="e.g. 600m²" value={form.land_size} onChange={(e) => set('land_size', e.target.value)} />
+      </label>
+      <label>Features (optional)
+        <CheckboxGroup options={FEATURES} values={form.features} onChange={(v) => set('features', v)} />
+      </label>
+      <label>Facing (optional)
+        <CheckboxGroup options={FACINGS} values={form.facing} onChange={(v) => set('facing', v)} />
       </label>
       <label>Notes (optional)
         <textarea value={form.notes} onChange={(e) => set('notes', e.target.value)} rows={2} />
