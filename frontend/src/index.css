@@ -104,6 +104,10 @@ a { color: var(--primary); text-decoration: none; }
   width: 240px;
 }
 
+.show-all-toggle { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--text-secondary); margin-bottom: 16px; cursor: pointer; }
+.show-all-toggle input { cursor: pointer; }
+.link-btn { background: none; border: none; padding: 0; color: var(--primary); font-size: inherit; font-weight: 500; cursor: pointer; text-decoration: underline; }
+
 /* ── Suburb grid ── */
 .suburb-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; }
 .suburb-card {

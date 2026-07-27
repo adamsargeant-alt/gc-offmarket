@@ -5,6 +5,7 @@ import { suburbsApi } from '../services/api';
 export default function Dashboard() {
   const [suburbs, setSuburbs] = useState([]);
   const [search, setSearch] = useState('');
+  const [showAll, setShowAll] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
@@ -15,7 +16,11 @@ export default function Dashboard() {
       .finally(() => setLoading(false));
   }, []);
 
-  const filtered = suburbs.filter(s => s.name.toLowerCase().includes(search.toLowerCase()));
+  const hasActivity = (s) => Number(s.listing_count) > 0 || Number(s.buyer_count) > 0;
+
+  const filtered = suburbs
+    .filter(s => showAll || hasActivity(s))
+    .filter(s => s.name.toLowerCase().includes(search.toLowerCase()));
 
   if (loading) return <div className="page-loading">Loading suburbs…</div>;
 
@@ -32,6 +37,10 @@ export default function Dashboard() {
         />
       </div>
       {error && <div className="auth-error">{error}</div>}
+      <label className="show-all-toggle">
+        <input type="checkbox" checked={showAll} onChange={(e) => setShowAll(e.target.checked)} />
+        Show all Gold Coast suburbs (including ones with no activity)
+      </label>
       <div className="suburb-grid">
         {filtered.map(s => (
           <Link key={s.id} to={`/suburbs/${s.id}`} className="suburb-card">
@@ -42,7 +51,10 @@ export default function Dashboard() {
             </div>
           </Link>
         ))}
-        {!filtered.length && <p className="empty-state">No suburbs match "{search}"</p>}
+        {!filtered.length && !showAll && (
+          <p className="empty-state">No suburbs with active listings or buyers yet. <button className="link-btn" onClick={() => setShowAll(true)}>Show all suburbs</button> to add one.</p>
+        )}
+        {!filtered.length && showAll && <p className="empty-state">No suburbs match "{search}"</p>}
       </div>
     </div>
   );
