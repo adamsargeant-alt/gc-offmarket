@@ -21,7 +21,7 @@ export default function Layout() {
           <NavLink to="/my-buyers" className={({ isActive }) => isActive ? 'active' : ''}>My Buyers</NavLink>
         </nav>
         <div className="topbar-user">
-          <span>{user?.name}{user?.role === 'admin' ? ' · Admin' : ''}</span>
+          <span>{user?.first_name} {user?.last_name}{user?.role === 'admin' ? ' · Admin' : ''}</span>
           <button className="btn btn-ghost btn-sm" onClick={handleLogout}>Log out</button>
         </div>
       </header>

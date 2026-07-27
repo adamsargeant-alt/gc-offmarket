@@ -38,13 +38,15 @@ router.get('/:id', requireAuth, async (req, res) => {
     if (!suburbResult.rows.length) return res.status(404).json({ error: 'Suburb not found' });
 
     const listingsResult = await db.query(
-      `SELECT l.*, u.name AS agent_name, u.email AS agent_email
+      `SELECT l.*, u.first_name || ' ' || u.last_name AS agent_name, u.email AS agent_email,
+              u.mobile_number AS agent_mobile, u.team AS agent_team
        FROM listings l JOIN users u ON u.id = l.agent_id
        WHERE l.suburb_id = $1 AND l.expires_at > NOW() ORDER BY l.created_at DESC`,
       [req.params.id]
     );
     const buyersResult = await db.query(
-      `SELECT b.*, u.name AS agent_name, u.email AS agent_email
+      `SELECT b.*, u.first_name || ' ' || u.last_name AS agent_name, u.email AS agent_email,
+              u.mobile_number AS agent_mobile, u.team AS agent_team
        FROM buyers b JOIN users u ON u.id = b.agent_id
        WHERE b.suburb_id = $1 AND b.expires_at > NOW() ORDER BY b.created_at DESC`,
       [req.params.id]

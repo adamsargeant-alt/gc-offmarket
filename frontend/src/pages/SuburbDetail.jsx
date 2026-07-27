@@ -89,7 +89,7 @@ export default function SuburbDetail() {
                   <span>{l.bathrooms} bath</span>
                 </div>
                 {l.notes && <div className="entity-notes">{l.notes}</div>}
-                <div className="entity-agent">Listed by {l.agent_name} · expires in {daysLeft(l.expires_at)}d</div>
+                <div className="entity-agent">Listed by {l.agent_name}{l.agent_team ? ` (${l.agent_team})` : ''} · <a href={`tel:${l.agent_mobile}`}>{l.agent_mobile}</a> · expires in {daysLeft(l.expires_at)}d</div>
               </div>
               <div className="entity-card-side">
                 {l.matching_buyer_ids.length > 0
@@ -119,7 +119,7 @@ export default function SuburbDetail() {
                   <span>{b.min_bathrooms}+ bath</span>
                 </div>
                 {b.notes && <div className="entity-notes">{b.notes}</div>}
-                <div className="entity-agent">Buyer via {b.agent_name} · expires in {daysLeft(b.expires_at)}d</div>
+                <div className="entity-agent">Buyer via {b.agent_name}{b.agent_team ? ` (${b.agent_team})` : ''} · <a href={`tel:${b.agent_mobile}`}>{b.agent_mobile}</a> · expires in {daysLeft(b.expires_at)}d</div>
               </div>
               <div className="entity-card-side">
                 {b.matching_listing_ids.length > 0

@@ -7,12 +7,36 @@ CREATE TABLE IF NOT EXISTS suburbs (
 -- ─── Agents (self-registered logins) ───────────────────────────────
 CREATE TABLE IF NOT EXISTS users (
   id SERIAL PRIMARY KEY,
-  name TEXT NOT NULL,
+  first_name TEXT NOT NULL,
+  last_name TEXT NOT NULL,
+  team TEXT,
+  mobile_number TEXT NOT NULL,
   email TEXT UNIQUE NOT NULL,
   password_hash TEXT NOT NULL,
   role TEXT NOT NULL DEFAULT 'agent' CHECK (role IN ('agent', 'admin')),
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+
+-- Safety net for users created before contact fields existed.
+-- Runs on every startup, so the old "name" column is only touched
+-- (migrated + dropped) once, the first time it's still present.
+ALTER TABLE users ADD COLUMN IF NOT EXISTS first_name TEXT;
+ALTER TABLE users ADD COLUMN IF NOT EXISTS last_name TEXT;
+ALTER TABLE users ADD COLUMN IF NOT EXISTS team TEXT;
+ALTER TABLE users ADD COLUMN IF NOT EXISTS mobile_number TEXT;
+DO $$
+BEGIN
+  IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'users' AND column_name = 'name') THEN
+    UPDATE users SET first_name = COALESCE(first_name, name) WHERE first_name IS NULL;
+    ALTER TABLE users DROP COLUMN name;
+  END IF;
+END $$;
+UPDATE users SET first_name = COALESCE(first_name, 'Unknown') WHERE first_name IS NULL;
+UPDATE users SET last_name = COALESCE(last_name, '') WHERE last_name IS NULL;
+UPDATE users SET mobile_number = COALESCE(mobile_number, 'Not provided') WHERE mobile_number IS NULL;
+ALTER TABLE users ALTER COLUMN first_name SET NOT NULL;
+ALTER TABLE users ALTER COLUMN last_name SET NOT NULL;
+ALTER TABLE users ALTER COLUMN mobile_number SET NOT NULL;
 
 -- ─── Off-market listings (sellers) ─────────────────────────────────
 -- No address on purpose — suburb + price only, plus 3 more matching fields.

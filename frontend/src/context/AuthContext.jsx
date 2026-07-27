@@ -29,8 +29,8 @@ export function AuthProvider({ children }) {
     persist(await authApi.login({ email, password }));
   }
 
-  async function register(name, email, password) {
-    persist(await authApi.register({ name, email, password }));
+  async function register(fields) {
+    persist(await authApi.register(fields));
   }
 
   function logout() {
