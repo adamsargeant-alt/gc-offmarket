@@ -27,7 +27,7 @@ export default function Dashboard() {
   return (
     <div>
       <div className="page-header">
-        <h1>Suburbs</h1>
+        <h1>Dashboard</h1>
         <input
           className="search-input"
           type="text"

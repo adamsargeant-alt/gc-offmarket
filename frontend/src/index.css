@@ -148,19 +148,21 @@ a { color: var(--primary); text-decoration: none; }
   border: 1px solid var(--border);
   border-radius: var(--radius);
   box-shadow: var(--shadow);
-  padding: 14px;
-  margin-bottom: 10px;
-  display: flex;
-  justify-content: space-between;
-  gap: 12px;
+  padding: 12px 14px;
+  margin-bottom: 8px;
 }
 .entity-card.withdrawn { opacity: 0.55; }
-.entity-price { font-weight: 700; font-size: 16px; margin-bottom: 4px; }
-.entity-tags { display: flex; flex-wrap: wrap; gap: 8px; font-size: 12px; color: var(--text-secondary); margin-bottom: 4px; }
+.entity-card-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; cursor: pointer; }
+.entity-card-summary { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; min-width: 0; }
+.entity-price { font-weight: 700; font-size: 15px; white-space: nowrap; }
+.entity-summary-meta { font-size: 12px; color: var(--text-secondary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.entity-chevron { color: var(--text-muted); font-size: 12px; flex-shrink: 0; }
+.entity-card-details { margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--border); }
+.entity-tags { display: flex; flex-wrap: wrap; gap: 8px; font-size: 12px; color: var(--text-secondary); margin-bottom: 8px; }
 .entity-tags span { background: var(--bg); padding: 2px 8px; border-radius: 999px; }
-.entity-notes { font-size: 12px; color: var(--text-secondary); margin-bottom: 4px; font-style: italic; }
+.entity-notes { font-size: 12px; color: var(--text-secondary); margin-bottom: 6px; font-style: italic; }
 .entity-agent { font-size: 11px; color: var(--text-muted); }
-.entity-card-side { display: flex; flex-direction: column; align-items: flex-end; gap: 8px; flex-shrink: 0; }
+.entity-card-side { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
 .match-badge { font-size: 11px; font-weight: 600; padding: 4px 10px; border-radius: 999px; background: var(--success-light); color: var(--success); white-space: nowrap; }
 .match-badge.muted { background: var(--bg); color: var(--text-muted); }
 
@@ -282,8 +284,10 @@ a { color: var(--primary); text-decoration: none; }
   .page-header { flex-wrap: wrap; }
   .search-input { width: 100%; }
 
-  .entity-card { flex-direction: column; }
-  .entity-card-side { flex-direction: row; align-items: center; justify-content: space-between; width: 100%; }
+  .entity-card-row { flex-wrap: wrap; }
+  .entity-card-summary { flex: 1 1 100%; }
+  .entity-summary-meta { white-space: normal; }
+  .entity-card-side { flex: 1 1 auto; justify-content: space-between; }
 
   .record-row { flex-direction: column; align-items: stretch; }
   .record-actions { justify-content: flex-end; }
