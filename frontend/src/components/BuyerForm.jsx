@@ -75,7 +75,6 @@ export default function BuyerForm({ suburbs, lockedSuburbId, initial, onSubmit, 
           onChange={(id) => set('suburb_id_1', id)}
           excludeIds={[form.suburb_id_2, form.suburb_id_3]}
           required
-          disabled={!!lockedSuburbId}
         />
       </label>
       <label>2nd suburb (optional)

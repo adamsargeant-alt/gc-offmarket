@@ -271,6 +271,9 @@ a { color: var(--primary); text-decoration: none; }
   font-size: 14px;
 }
 .auth-switch { text-align: center; font-size: 13px; color: var(--text-secondary); }
+.auth-divider { display: flex; align-items: center; gap: 10px; color: var(--text-muted); font-size: 12px; }
+.auth-divider::before, .auth-divider::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+.auth-hint { text-align: center; font-size: 12px; color: var(--text-muted); margin-top: -6px; }
 .auth-error { background: var(--danger-light); color: var(--danger); padding: 10px 12px; border-radius: var(--radius); font-size: 13px; }
 
 /* ── Mobile ── */

@@ -182,7 +182,7 @@ export default function SuburbDetail() {
 
       {showListingForm && (
         <Modal title={`Add listing in ${suburb.name}`} onClose={() => setShowListingForm(false)}>
-          <ListingForm suburbs={[suburb]} lockedSuburbId={suburb.id} onSubmit={handleCreateListing} onCancel={() => setShowListingForm(false)} />
+          <ListingForm suburbs={allSuburbs} lockedSuburbId={suburb.id} onSubmit={handleCreateListing} onCancel={() => setShowListingForm(false)} />
         </Modal>
       )}
       {showBuyerForm && (

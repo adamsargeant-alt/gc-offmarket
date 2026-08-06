@@ -63,7 +63,7 @@ export default function ListingForm({ suburbs, lockedSuburbId, initial, onSubmit
     <form className="entity-form" onSubmit={handleSubmit}>
       {error && <div className="auth-error">{error}</div>}
       <label>Suburb
-        <SuburbAutocomplete suburbs={suburbs} value={form.suburb_id} onChange={(id) => set('suburb_id', id)} required disabled={!!lockedSuburbId} />
+        <SuburbAutocomplete suburbs={suburbs} value={form.suburb_id} onChange={(id) => set('suburb_id', id)} required />
       </label>
       <label>Price
         <CurrencyInput value={form.price} onChange={(v) => set('price', v)} required />

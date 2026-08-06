@@ -39,7 +39,9 @@ export default function Login() {
         <button className="btn btn-primary btn-lg" type="submit" disabled={busy}>
           {busy ? 'Logging in…' : 'Log in'}
         </button>
-        <p className="auth-switch">No account? <Link to="/register">Register</Link></p>
+        <div className="auth-divider"><span>or</span></div>
+        <Link to="/register" className="btn btn-secondary btn-lg">Please register</Link>
+        <p className="auth-hint">New here? This is a separate GC Off-Market account — not your Ray White login.</p>
       </form>
     </div>
   );
